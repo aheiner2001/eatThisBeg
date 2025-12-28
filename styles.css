@@ -1,1 +1,41 @@
+Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for $19.99 $0 for 1 month
+body{
+  background-image: url("chess texture.png");
+}
+.square{
+    position:absolute;
+    box-shadow:5px 5px 15px black;
+    width:75px;
+    height:75px;
+    background-color:white;
+    /* color:cornflowerblue; */
+    color:transparent;
+  
+    background-size: 75px 75px;
+    background-repeat: no-repeat;
+    
+    -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
 
+.whiteSquares{
+    position:absolute;
+    box-shadow:5px 5px 15px black;
+    width:75px;
+    height:75px;
+    /* border:10px solid black; */
+    background-color:white;
+    /* color:cornflowerblue; */
+    /* color:transparent; */
+    color:cornflowerblue;
+    background-size: 75px 75px;
+    background-repeat: no-repeat;
+
+    -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+    
+}
+
+ 
