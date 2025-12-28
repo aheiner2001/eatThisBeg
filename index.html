@@ -1,0 +1,2530 @@
+Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for $19.99 $0 for 1 month
+<link rel="stylesheet" href="CHESS.css">
+
+
+<span id="whoseTurn">It is the color black's turn!</span>
+
+
+<script>
+ var squares = []   
+ var piecePosition = []
+ var pawnsMovement = []
+ var kingDanger = []
+ var check = false
+ var sloppySub = []
+
+var whoseTurn = document.getElementById("whoseTurn")
+ var test = document.createElement("SPAN")
+ document.body.appendChild(test)
+ test.style.display = "none"
+ var blackSub = "#591308"
+//  var blackSub = "#823200"
+// blackSub = "#b85619"
+// blackSub = "#753402"
+// blackSub = "#5e2100"
+
+var whiteGoesFirst = 1
+
+var whiteSub = "#e6e0df"
+whiteSub = "#dbc09f"
+whiteSub = "#ebd6c2"
+
+ setPiecePosition()
+makeGrid()
+checkPawnMovement()
+
+
+function checkPawnMovement(){ 
+    for(var y = 0 ;y < 8; y++){
+        for(var x = 0; x < 8; x++){
+            if(squares[y + "," + x].innerHTML == "pawn" || squares[y + "," + x].innerHTML == "whitePawn"){
+                pawnsMovement[y + "," + x] = "notMoved"
+            }
+        }
+    }
+
+}
+
+
+function makeGrid(){
+    var sub
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            squares[y + "," + x] = document.createElement("SPAN")
+            squares[y + "," + x].className = "square"
+            squares[y + "," + x].innerHTML = piecePosition[y + "," + x]
+            sub = piecePosition[y + "," + x]                              /*   |    */
+        /*The reason the line below this wasn't working was because this comma v is registering as a second paramter*/
+            squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+            if(squares[y + "," + x].innerHTML == "pawn"){
+             squares[y + "," + x].style.backgroundImage = "url(image.png)"
+            }
+            if(squares[y + "," + x].innerHTML == "bishop"){
+             squares[y + "," + x].style.backgroundImage = "url(bishops.png)"
+            
+             
+            }
+            if(squares[y + "," + x].innerHTML == "knight"){
+             squares[y + "," + x].style.backgroundImage = "url(blackKnight.png)"
+            
+            
+             
+            }
+            if(squares[y + "," + x].innerHTML == "rook"){
+                squares[y + "," + x].style.backgroundImage = "url(rook.png)"
+                squares[y + "," + x].style.backgroundSize = "75px 75px"
+                squares[y + "," + x].style.backgroundPositionY = "3px"
+
+                }
+            
+                if(squares[y + "," + x].innerHTML == "queen"){
+                    squares[y + "," + x].style.backgroundImage = "url(queen.png)"
+                }
+                if(squares[y + "," + x].innerHTML == "king"){
+                    squares[y + "," + x].style.backgroundImage = "url(king.png)"
+                }
+                if(squares[y + "," + x].innerHTML == "whitePawn"){
+                    squares[y + "," + x].style.backgroundImage = "url(whitePawn.png)"
+                }
+                
+              
+            squares[y + "," + x].style.backgroundColor = color
+            squares[y + "," + x].style.color = "transparent"
+            squares[y + "," + x].style.top = y*76 + 50
+            squares[y + "," + x].style.left = x*76 + 50
+            document.body.appendChild(squares[y + "," + x])
+
+            if(y == 7 || y == 6){
+                    squares[y + "," + x].className = "whiteSquares"
+                }
+            if(x == 0 && y == 0){
+                squares[y + "," + x].style.borderTopLeftRadius = "30%"    
+            }
+            if(x == 7 && y == 0){
+                squares[y + "," + x].style.borderTopRightRadius = "30%"    
+            }
+            if(x == 7 && y == 7){
+                squares[y + "," + x].style.borderBottomRightRadius = "30%"    
+            }
+            if(x == 0 && y == 7){
+                squares[y + "," + x].style.borderBottomLeftRadius = "30%"    
+            }
+            if(squares[y + "," + x].className == "whiteSquares"){
+
+
+                if(squares[y + "," + x].innerHTML == "bishop"){
+             squares[y + "," + x].style.backgroundImage = "url(whiteBishop.png)"
+            
+             
+            }
+            if(squares[y + "," + x].innerHTML == "knight"){
+             squares[y + "," + x].style.backgroundImage = "url(whiteKnight.png)"
+             squares[y + "," + x].style.backgroundSize = "75px 75px"
+             squares[y + "," + x].style.backgroundPositionX = "0px"
+            
+             
+            }
+            if(squares[y + "," + x].innerHTML == "rook"){
+                squares[y + "," + x].style.backgroundImage = "url(whiteRook.png)"
+                squares[y + "," + x].style.backgroundSize = "75px 75px"
+                squares[y + "," + x].style.backgroundPositionY = "3px"
+
+                }
+            
+                if(squares[y + "," + x].innerHTML == "queen"){
+                    squares[y + "," + x].style.backgroundImage = "url(whiteQueen.png)"
+                }
+                if(squares[y + "," + x].innerHTML == "king"){
+                    squares[y + "," + x].style.backgroundImage = "url(whiteKing.png)"
+                }
+                if(squares[y + "," + x].innerHTML == "whitePawn"){
+                    squares[y + "," + x].style.backgroundImage = "url(whitePawn.png)"
+                }
+
+
+
+            }
+        }
+    }
+}
+
+
+
+function setPiecePosition(){
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            piecePosition[y + "," + x] = "empty"
+            if(y == 1){
+                piecePosition[y + "," + x] = "pawn"
+            }
+            if(y == 6){
+                piecePosition[y + "," + x] = "whitePawn"
+            }
+            if(y == 0 || y == 7){
+                if(x == 0 || x == 7){
+                    piecePosition[y + "," + x] = "rook"
+                }
+                if(x == 1 || x == 6){
+                    piecePosition[y + "," + x] = "knight"
+                }
+                if(x == 2 || x == 5){
+                    piecePosition[y + "," + x] = "bishop"
+                }
+                if(x == 3){
+                    piecePosition[y + "," + x] = "queen"
+                }
+                if(x == 4){
+                    piecePosition[y + "," + x] = "king"
+                }
+            }     
+        }   
+    }
+}
+function isKingInCheck(kX,kY){
+    clear()
+    // squares[kY + "," + kX].innerHTML = "empty"
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0; x < 8; x++){
+            if(squares[y + "," + x].className == squares[kY + "," + kX].className){
+                
+                if(squares[y + "," + x].innerHTML != "whitePawn" && squares[y + "," + x].innerHTML != "pawn"){
+                verifyCheckMate(x,y)
+                }else{
+                    if(squares[y + "," + x].className == "whiteSquares"){
+                        if(y != 0){
+                        if(x != 0){
+                        squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+                        }
+                        if(x != 7){
+                        squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+                        }
+                    }
+                    }else{
+                        if(y != 7){
+                            if(x != 0){
+                        squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+                            }
+                            if(x != 7){
+                        squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+                            }
+                        }
+                    }
+                }
+       
+            }
+                
+            }
+
+        }
+ 
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0; x < 8; x++){
+            if(squares[y + "," + x].innerHTML == "king" && squares[y + "," + x].style.backgroundColor == "gray"){
+                squares[y + "," + x].style.backgroundColor = "red"
+                return squares[y + "," + x]
+            }
+                
+                
+            
+        }}
+        return "nothing"
+}
+
+
+function checkMate(kX,kY){
+var isItRed = false
+if(squares[kY + "," + kX].style.backgroundColor == "red"){
+    isItRed = true
+}
+    squares[kY + "," + kX].innerHTML = "empty"
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0; x < 8; x++){
+            if(squares[y + "," + x].className != squares[kY + "," + kX].className){
+                
+                if(squares[y + "," + x].innerHTML != "whitePawn" && squares[y + "," + x].innerHTML != "pawn"){
+                verifyCheckMate(x,y)
+                }else{
+                    if(squares[y + "," + x].className == "whiteSquares"){
+                        if(y != 0){
+                        if(x != 0){
+                        squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+                        }
+                        if(x != 7){
+                        squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+                        }
+                    }
+                    }else{
+                        if(y != 7){
+                            if(x != 0){
+                        squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+                            }
+                            if(x != 7){
+                        squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+                            }
+                        }
+                    }
+                }
+       
+            }
+                
+            }
+
+        }
+ 
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0; x < 8; x++){
+    if(squares[y + "," + x].style.backgroundColor == "gray"){
+        if(squares[y + "," + x].style.backgroundImage == "url(king.png" || squares[y + "," + x].style.backgroundImage == "url(whiteKing.png"){
+            squares[y + "," + x].style.backgroundColor = "red"
+        }
+                    kingDanger[y + "," + x] = "danger"
+                }else{
+                    kingDanger[y + "," + x] = "safe"
+                }
+            }
+        }
+
+
+
+
+
+
+
+if(isItRed == true){
+    squares[kY + "," + kX].style.backgroundColor = "red"
+}
+
+        squares[kY + "," + kX].innerHTML = "king"
+    
+        
+    }
+    
+
+function verifyCheckMate(x,y){
+    
+    if(squares[y + "," + x].innerHTML == "rook"){
+        test.innerHTML = "good"
+    }
+    if(squares[y + "," + x].innerHTML == "pawn"){
+        test.innerHTML = "pawn"
+        showPawnOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "bishop"){
+        showBishopOptionsCheck(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "rook"){
+        showRookOptionsCheck(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "knight"){
+        showKnightOptionsCheck(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "queen"){
+        showQueenOptionsCheck(x,y)
+    }
+   
+    if(squares[y + "," + x].innerHTML == "whitePawn"){
+        showWhitePawnOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "king"){
+        showKingOptionsCheck(x,y)
+    }
+   
+    
+}
+
+
+function verifyCheckOnSameSide(x,y){
+    
+    if(squares[y + "," + x].innerHTML == "rook"){
+        test.innerHTML = "good"
+    }
+    if(squares[y + "," + x].innerHTML == "pawn"){
+        test.innerHTML = "pawn"
+        showPawnOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "bishop"){
+        showBishopOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "rook"){
+        showRookOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "knight"){
+        showKnightOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "queen"){
+        showQueenOptions(x,y)
+    }
+   
+    if(squares[y + "," + x].innerHTML == "whitePawn"){
+        showWhitePawnOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "king"){
+        showKingOptions(x,y,"dontClear")
+    }
+   
+    
+}
+
+function verifyPiece(x,y){
+    var sub
+    var redSub = ""
+    if(squares[y + "," + x].style.backgroundColor == "red"){
+        redSub = "true"
+    }
+//     var xSub 
+//     var ySub
+// if(squares[y + "," + x].innerHTML == "king"){
+//     ySub = y
+//     xSub = x
+// }
+        //  squares[y + "," + x].style.boxShadow = "1px 1px 10px black"
+        //  squares[y + "," + x].style.zIndex = "500"
+
+    
+    if(whiteGoesFirst > 0){
+        sub = "square"
+        
+
+       
+        
+        }else{
+            sub = "whiteSquares"
+
+            
+        }
+  if(squares[y + "," + x].className == sub){
+      
+        
+    if(whiteGoesFirst > 0){
+  
+        checkIfKingIsInCheck(sub)
+       
+        
+        }else{
+   
+            checkIfKingIsInCheck(sub)
+            
+        }
+
+clear()
+if(redSub == "true"){
+    squares[y + "," + x].style.backgroundColor = "red"
+}
+    if(squares[y + "," + x].innerHTML == "rook"){
+        test.innerHTML = "good"
+    }
+    if(squares[y + "," + x].innerHTML == "pawn"){
+        test.innerHTML = "pawn"
+        showPawnOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "bishop"){
+        showBishopOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "rook"){
+        showRookOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "knight"){
+        showKnightOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "queen"){
+        showQueenOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "king"){
+        showKingOptions(x,y)
+    }
+    if(squares[y + "," + x].innerHTML == "whitePawn"){
+        showWhitePawnOptions(x,y)
+    }
+  }
+}
+
+
+
+function showKingOptions(x,y,clearOrNot = "clear"){
+  if(clearOrNot == "clear"){
+   checkMate(x,y)
+  
+   clear()
+  }else{
+      for(var yT = 0 ;yT < 8; yT++){
+          for(var xT = 0 ;xT<8; xT++){
+              sloppySub[yT + "," + xT] = squares[yT + "," + xT].style.backgroundColor
+          }
+      }
+      checkMate(x,y)
+  
+  clear()
+  for(var yT = 0 ;yT < 8; yT++){
+          for(var xT = 0 ;xT<8; xT++){
+  squares[yT + "," + xT].style.backgroundColor = sloppySub[yT + "," + xT]
+          }}
+  }
+   
+   
+    if(y != 0){
+        if(x != 7){
+            
+           
+    if(squares[(y-1) + "," + (x+1)].innerHTML == "empty"){
+        if(kingDanger[(y-1) + "," + (x+1)] == "safe"){
+        squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+    squares[(y-1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y-1) + ")")
+        }
+    }else{
+        if(squares[(y-1) + "," + (x+1)].className != squares[y + "," + x].className){
+            if(kingDanger[(y-1) + "," + (x+1)] == "safe"){
+            squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+    squares[(y-1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y-1) + ")")
+        }
+    }
+}
+            
+        }
+if(x != 0){
+    if(squares[(y-1) + "," + (x-1)].innerHTML == "empty"){
+        if(kingDanger[(y-1) + "," + (x-1)] == "safe"){
+        squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+    squares[(y-1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y-1) + ")")
+        }
+    }else{
+        if(squares[(y-1) + "," + (x-1)].className != squares[y + "," + x].className){
+            if(kingDanger[(y-1) + "," + (x-1)] == "safe"){
+            squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+    squares[(y-1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y-1) + ")")
+        }
+    }
+}
+}
+    if(squares[(y-1) + "," + (x)].innerHTML == "empty"){
+        if(kingDanger[(y-1) + "," + (x)] == "safe"){
+        squares[(y-1) + "," + (x)].style.backgroundColor = "gray"
+    squares[(y-1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y-1) + ")")
+        }
+    }else{
+        if(squares[(y-1) + "," + (x)].className != squares[y + "," + x].className){
+            if(kingDanger[(y-1) + "," + (x)] == "safe"){
+            squares[(y-1) + "," + (x)].style.backgroundColor = "gray"
+    squares[(y-1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y-1) + ")")
+        }
+    }
+}
+    }
+if(y != 7){
+    if(x != 7){
+    if(squares[(y+1) + "," + (x+1)].innerHTML == "empty"){
+        if(kingDanger[(y+1) + "," + (x+1)] == "safe"){
+        squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+    squares[(y+1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y+1) + ")")
+        }
+    }else{
+        if(squares[(y+1) + "," + (x+1)].className != squares[y + "," + x].className){
+            if(kingDanger[(y+1) + "," + (x+1)] == "safe"){
+            squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+    squares[(y+1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y+1) + ")")
+        }
+    }
+}
+    }
+if(x != 0){
+
+    if(squares[(y+1) + "," + (x-1)].innerHTML == "empty"){
+        if(kingDanger[(y+1) + "," + (x-1)] == "safe"){
+        squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+    squares[(y+1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y+1) + ")")
+        }
+    }else{
+        if(squares[(y+1) + "," + (x-1)].className != squares[y + "," + x].className){
+            if(kingDanger[(y+1) + "," + (x-1)] == "safe"){
+            squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+    squares[(y+1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y+1) + ")")
+        }
+    }
+}
+}
+    if(squares[(y+1) + "," + (x)].innerHTML == "empty"){
+        // whoseTurn.innerHTML = kingDanger[(y+1) + "," + (x)]
+        if(kingDanger[(y+1) + "," + (x)] == "safe"){
+        squares[(y+1) + "," + (x)].style.backgroundColor = "gray"
+    squares[(y+1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y+1) + ")")
+        }
+    }else{
+        if(squares[(y+1) + "," + (x)].className != squares[y + "," + x].className){
+            if(kingDanger[(y+1) + "," + (x)] == "safe"){
+            squares[(y+1) + "," + (x)].style.backgroundColor = "gray"
+    squares[(y+1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y+1) + ")")
+        }
+    }
+}
+}
+   
+if(x != 7){
+    if(squares[(y) + "," + (x+1)].innerHTML == "empty"){
+        if(kingDanger[(y) + "," + (x+1)] == "safe"){
+        squares[(y) + "," + (x+1)].style.backgroundColor = "gray"
+    squares[(y) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y) + ")")
+        }
+    }else{
+        if(squares[(y) + "," + (x+1)].className != squares[y + "," + x].className){
+            if(kingDanger[(y) + "," + (x+1)] == "safe"){
+            squares[(y) + "," + (x+1)].style.backgroundColor = "gray"
+    squares[(y) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y) + ")")
+        }
+    }
+}
+}
+   if(x != 0){
+    if(squares[(y) + "," + (x-1)].innerHTML == "empty"){
+        if(kingDanger[(y) + "," + (x-1)] == "safe"){
+        squares[(y) + "," + (x-1)].style.backgroundColor = "gray"
+    squares[(y) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y) + ")")
+        }
+    }else{
+        if(squares[(y) + "," + (x-1)].className != squares[y + "," + x].className){
+            if(kingDanger[(y) + "," + (x-1)] == "safe"){
+            squares[(y) + "," + (x-1)].style.backgroundColor = "gray"
+    squares[(y) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y) + ")")
+        }
+    }
+}
+   }
+//    var kingTest = 0
+//    for(var x = 0; x < 7; x ++){
+//     for(var y = 0; y < 7; y ++){
+//         if(squares[y + "," + x].style.backgroundColor != "gray"){
+//             kingTest++
+//             }
+//     }
+//    }
+//    if(kingTest == 49){
+//        whoseTurn.innerHTML = "CHECKMATE"
+//    }
+}
+
+function checkIfKingIsInCheck(sub){
+    
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0; x < 8; x++){
+            if(squares[y + "," + x].className == sub){
+                
+                if(squares[y + "," + x].innerHTML != "whitePawn" && squares[y + "," + x].innerHTML != "pawn"){
+                verifyCheckOnSameSide(x,y)
+                }else{
+                    if(squares[y + "," + x].className == "whiteSquares"){
+                        if(y != 0){
+                            squares[(y-1) + "," + (x)].style.backgroundColor = "gray"
+                        if(x != 0){
+                        squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+                        }
+                        if(x != 7){
+                        squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+                        }
+                    }
+                    }else{
+                        if(y != 7){
+                            squares[(y+1) + "," + (x)].style.backgroundColor = "gray"
+                            if(x != 0){
+                        squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+                            }
+                            if(x != 7){
+                        squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+                            }
+                        }
+                    }
+                }
+       
+            }
+                
+            }
+
+        }
+  
+}
+
+
+function clear(){
+    for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "red" ){
+                color = "red"
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray" || squares[y + "," + x].style.backgroundColor == "red" ){
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+            }
+            
+            squares[y + "," + x].style.backgroundColor = color
+           
+
+}
+   }
+}
+function kingMove(x,y,xToReplace,yToReplace){
+    if(whiteGoesFirst > 0){
+        whoseTurn.innerHTML = "It is the color white's turn!"
+    }else{
+        whoseTurn.innerHTML = "It is the color black's turn!"
+    }
+    whiteGoesFirst = -whiteGoesFirst
+
+    var sub = squares[y + "," + x].innerHTML
+    var classSub = squares[y + "," + x].className
+    var imageSube = squares[y + "," + x].style.backgroundImage 
+   squares[yToReplace + "," + xToReplace].innerHTML = sub
+   squares[yToReplace + "," + xToReplace].style.backgroundImage = imageSube
+
+   squares[y + "," + x].style.backgroundImage = ""
+   squares[yToReplace + "," + xToReplace].className = classSub
+   squares[y + "," + x].className = "square"
+
+
+   squares[y + "," + x].innerHTML = "empty"
+  
+   squares[y + "," + x].style.backgroundImage = ""
+
+   var xSub  = x
+   var ySub = y
+  
+
+   for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray"){
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+            }
+         
+            squares[yToReplace + "," + xToReplace].setAttribute("onclick", "verifyPiece(" + xToReplace + "," + yToReplace + ")")
+            squares[y + "," + x].style.backgroundColor = color
+
+}
+   }  
+
+   
+   
+}
+
+function showQueenOptions(x,y){
+    if(y != 7){
+  var i = 1
+  if(x != 7){
+ if(squares[(y+1) + "," + (x+1)].innerHTML == "empty"){
+  while(i < 8){
+
+    if(y+i >= 8){
+        break
+    }
+    if(x+i >= 8){
+        break
+    }
+    if(squares[(y+i) + "," + (x+i)].innerHTML == "empty"){
+    squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+i++
+  }else{
+    if(squares[(y+i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+    }
+      break
+  }
+}
+}else{
+    if(squares[(y+i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+    }
+}
+  }
+i = 1
+if(x != 0){
+if(squares[(y+1) + "," + (x-1)].innerHTML == "empty"){
+  while(i < 8){
+    if(y+i >= 8){
+        break
+    }
+    if(x-i < 0){
+        break
+    }
+    if(squares[(y+i) + "," + (x-i)].innerHTML == "empty"){
+    squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+i++
+  }else{
+    if(squares[(y+i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+    }
+      break;
+  }
+}
+}else{
+    if(squares[(y+i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+    }
+}
+}
+}
+if(y!=0){
+
+
+    var i = 1
+  if(x != 0){
+ if(squares[(y-1) + "," + (x-1)].innerHTML == "empty"){
+  while(i < 8){
+
+    if(y-i < 0){
+        break
+    }
+    if(x-i < 0){
+        break
+    }
+    if(squares[(y-i) + "," + (x-i)].innerHTML == "empty"){
+    squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+i++
+  }else{
+    if(squares[(y-i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+    }
+      break
+  }
+
+}
+}else{
+    if(squares[(y-i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+    }
+}
+  }
+i = 1
+if(x != 7){
+if(squares[(y-1) + "," + (x+1)].innerHTML == "empty"){
+  while(i < 8){
+    if(y-i < 0){
+        break
+    }
+    if(x+i >= 8){
+        break
+    }
+    if(squares[(y-i) + "," + (x+i)].innerHTML == "empty"){
+    squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+i++
+  }else{
+    if(squares[(y-i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+    }
+      break
+  }
+}
+}else{
+    if(squares[(y-i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+    }
+}
+}
+}
+
+
+
+var i = 1
+    if(y != 7){
+        if(squares[(y+1) + "," + x].innerHTML == "empty"){
+            while(i < 8){
+                if(y + i > 7){
+                    break;
+                }
+                if(squares[(y+i) + "," + x].innerHTML == "empty"){
+                    squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y+i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+                    i++
+  }else{
+      if(squares[(y+i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y+i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+      }
+   
+      break
+  }
+              
+
+            }
+        }else{
+            if(squares[(y+i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y+i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+      }
+        }
+    }
+    var i = 1
+    if(x != 7){
+        if(squares[y + "," + (x+1)].innerHTML == "empty"){
+            while(i < 8){
+                if(x + i > 7){
+                    break;
+                }
+                if(squares[y + "," + (x+i)].innerHTML == "empty"){
+                    squares[y + "," + (x+i)].style.backgroundColor = "gray"
+                    squares[y + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+                    i++
+  }else{
+    if(squares[(y) + "," + (x+i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+      }
+      break
+  }
+              
+
+            }
+        }else{
+            if(squares[(y) + "," + (x+i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+      }
+        }
+    }
+    i = 1
+    if(x!= 0){
+        if(squares[y + "," + (x-1)].innerHTML == "empty"){
+            while(i < 8){
+                if(x - i < 0){
+                    break;
+                }
+                if(squares[y + "," + (x-i)].innerHTML == "empty"){
+                    squares[y + "," + (x-i)].style.backgroundColor = "gray"
+                    squares[y + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + y + ")")
+                    i++
+  }else{
+    if(squares[(y) + "," + (x-i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+      }
+      break
+  }
+              
+
+            }
+            
+        }else{
+            if(squares[(y) + "," + (x-i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+      }
+        }
+    }
+    i = 1
+    if(y!=0){
+        if(squares[(y-1) + "," + x].innerHTML == "empty"){
+            while(i < 8){
+                if(y - i < 0){
+                    break;
+                }
+                if(squares[(y-i) + "," + x].innerHTML == "empty"){
+                    squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y-i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+                    i++
+  }else{
+    if(squares[(y-i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y-i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+      }
+      break
+  }
+              
+
+            }
+        }else{
+            if(squares[(y-i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y-i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+      }
+        }
+    }
+    
+
+}
+function queenMove(x,y,xToReplace,yToReplace){
+    var subForASub
+    if(whiteGoesFirst > 0){
+        whoseTurn.innerHTML = "It is the color white's turn!"
+    }else{
+        whoseTurn.innerHTML = "It is the color black's turn!"
+    }
+    whiteGoesFirst = -whiteGoesFirst
+    var sub = squares[y + "," + x].innerHTML
+    var imageSub = squares[y + "," + x].style.backgroundImage
+   squares[yToReplace + "," + xToReplace].innerHTML = sub
+   squares[yToReplace + "," + xToReplace].style.backgroundImage = imageSub
+
+   squares[y + "," + x].style.backgroundImage = ""
+
+   var classSub = squares[y + "," + x].className
+   squares[yToReplace + "," + xToReplace].className = classSub
+   squares[y + "," + x].className = "square"
+
+
+   squares[y + "," + x].innerHTML = "empty"
+   squares[y + "," + x].style.backgroundImage = ""
+
+  
+   var checkOrNot = isKingInCheck(xToReplace,yToReplace)
+   
+
+   for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray" || squares[y + "," + x].style.backgroundColor == "red"){
+            
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+            }
+
+           
+            squares[y + "," + x].style.backgroundColor = color
+        
+            squares[yToReplace + "," + xToReplace].setAttribute("onclick", "verifyPiece(" + xToReplace + "," + yToReplace + ")")
+           
+         
+}
+   }
+   if(checkOrNot != "nothing"){
+       checkOrNot.style.backgroundColor = "red"
+       }
+
+}
+
+function showKnightOptions(x,y){
+    if(x != 0 && y != 0){
+        if(y - 2 >= 0){
+            if(squares[(y-2) + "," + (x-1)].innerHTML == "empty"){
+                squares[(y-2) + "," + (x-1)].style.backgroundColor = "gray"
+        squares[(y-2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y-2) + ")")
+            }else{
+                if(squares[(y-2) + "," + (x-1)].className != squares[y + "," + x].className){
+                    squares[(y-2) + "," + (x-1)].style.backgroundColor = "gray"
+                    squares[(y-2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y-2) + ")")
+                }
+            }
+        }
+        }
+        if(x != 7 && y != 0){
+            if(y - 2 >= 0){
+            if(squares[(y-2) + "," + (x+1)].innerHTML == "empty"){
+                squares[(y-2) + "," + (x+1)].style.backgroundColor = "gray"
+        squares[(y-2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y-2) + ")")
+            }else{
+                if(squares[(y-2) + "," + (x+1)].className != squares[y + "," + x].className){
+                    squares[(y-2) + "," + (x+1)].style.backgroundColor = "gray"
+                    squares[(y-2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y-2) + ")")
+                }
+            }
+        }
+        }
+        if(x != 0 && y != 0){
+            if(x - 2 >= 0){
+            if(squares[(y-1) + "," + (x-2)].innerHTML == "empty"){
+                squares[(y-1) + "," + (x-2)].style.backgroundColor = "gray"
+        squares[(y-1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y-1) + ")")
+            }else{
+                if(squares[(y-1) + "," + (x-2)].className != squares[y + "," + x].className){
+                    squares[(y-1) + "," + (x-2)].style.backgroundColor = "gray"
+                    squares[(y-1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y-1) + ")")
+                }
+            }
+        }
+        }
+        if(x != 0 && y != 7){
+            if(x - 2 >= 0){
+            if(squares[(y+1) + "," + (x-2)].innerHTML == "empty"){
+                squares[(y+1) + "," + (x-2)].style.backgroundColor = "gray"
+        squares[(y+1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y+1) + ")")
+            }else{
+                if(squares[(y+1) + "," + (x-2)].className != squares[y + "," + x].className){
+                    squares[(y+1) + "," + (x-2)].style.backgroundColor = "gray"
+                    squares[(y+1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y+1) + ")")
+                }
+            }
+        }
+        }
+        if(y != 7 && x != 0){
+            if(y + 2 < 8){
+            if(squares[(y+2) + "," + (x-1)].innerHTML == "empty"){
+                squares[(y+2) + "," + (x-1)].style.backgroundColor = "gray"
+        squares[(y+2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y+2) + ")")
+            }else{
+                if(squares[(y+2) + "," + (x-1)].className != squares[y + "," + x].className){
+                    squares[(y+2) + "," + (x-1)].style.backgroundColor = "gray"
+                    squares[(y+2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y+2) + ")")
+                }
+            }
+        }
+        }
+        if(y !=7 && x != 7){
+            if(y + 2 < 8){
+            if(squares[(y+2) + "," + (x+1)].innerHTML == "empty"){
+                squares[(y+2) + "," + (x+1)].style.backgroundColor = "gray"
+        squares[(y+2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y+2) + ")")
+            }else{
+                if(squares[(y+2) + "," + (x+1)].className != squares[y + "," + x].className){
+                    squares[(y+2) + "," + (x+1)].style.backgroundColor = "gray"
+                    squares[(y+2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y+2) + ")")
+                }
+                }
+        }
+        }
+        if(y != 0 && x != 7){
+            if(x + 2 < 8){
+                if(squares[(y-1) + "," + (x+2)].innerHTML == "empty"){
+                squares[(y-1) + "," + (x+2)].style.backgroundColor = "gray"
+        squares[(y-1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y-1) + ")")
+            }else{
+                if(squares[(y-1) + "," + (x+2)].className != squares[y + "," + x].className){
+                    squares[(y-1) + "," + (x+2)].style.backgroundColor = "gray"
+                    squares[(y-1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y-1) + ")")
+                }
+            }
+            }
+        }
+        if(y != 7 && x != 7){
+            if(x + 2 < 8){
+                if(squares[(y+1) + "," + (x+2)].innerHTML == "empty"){
+                squares[(y+1) + "," + (x+2)].style.backgroundColor = "gray"
+        squares[(y+1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y+1) + ")")
+            }else{
+                if(squares[(y+1) + "," + (x+2)].className != squares[y + "," + x].className){
+                    squares[(y+1) + "," + (x+2)].style.backgroundColor = "gray"
+                    squares[(y+1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y+1) + ")")
+                }
+            }
+            }
+        }
+}
+
+
+function knightMove(x,y,xToReplace,yToReplace){
+    if(whiteGoesFirst > 0){
+        whoseTurn.innerHTML = "It is the color white's turn!"
+    }else{
+        whoseTurn.innerHTML = "It is the color black's turn!"
+    }
+    whiteGoesFirst = -whiteGoesFirst
+    var sub = squares[y + "," + x].innerHTML
+    var subT = squares[y + "," + x].style.backgroundSize 
+    var subTh = squares[y + "," + x].style.backgroundPositionX
+    var imageSub = squares[y + "," + x].style.backgroundImage
+
+   squares[yToReplace + "," + xToReplace].innerHTML = sub
+   squares[yToReplace + "," + xToReplace].style.backgroundImage = imageSub
+
+   squares[y + "," + x].style.backgroundImage = ""
+
+   var classSub = squares[y + "," + x].className
+   squares[yToReplace + "," + xToReplace].className = classSub
+   squares[y + "," + x].className = "square"
+
+   squares[yToReplace + "," + xToReplace].style.backgroundSize = subT
+    squares[yToReplace + "," + xToReplace].style.backgroundPositionX = subTh
+
+    squares[y + "," + x].style.backgroundSize =""
+    squares[y + "," + x].style.backgroundPositionX =""
+
+
+
+
+   squares[y + "," + x].innerHTML = "empty"
+   squares[y + "," + x].style.backgroundImage = ""
+
+   for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray"){
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+            }
+            squares[yToReplace + "," + xToReplace].setAttribute("onclick", "verifyPiece(" + xToReplace + "," + yToReplace + ")")
+            squares[y + "," + x].style.backgroundColor = color
+
+}
+   }
+    }
+
+
+
+
+    function showPawnOptions(x,y){
+        if(pawnsMovement[y + "," + x] == "notMoved"){
+            if(squares[(y+1) + "," + x].innerHTML == "empty"){
+            squares[(y+1) + "," + x].style.backgroundColor = "gray"
+        squares[(y+1) + "," + x].setAttribute("onclick" , "pawnMove(" + x + "," + y + "," + x + "," + (y+1) + ")")
+        if(squares[(y+2) + "," + x].innerHTML == "empty"){
+        squares[(y+2) + "," + x].style.backgroundColor = "gray"
+        squares[(y+2) + "," + x].setAttribute("onclick" , "pawnMove(" + x + "," + y + "," + x + "," + (y+2) + ")")
+            }
+            }
+           
+        if(x != 7){
+    if(squares[(y+1) + "," + (x+1)].innerHTML != "empty"){
+        if(squares[(y+1) + "," + (x+1)].className == "whiteSquares"){
+            squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+        squares[(y+1) + "," + (x+1)].setAttribute("onclick" , "pawnMove(" + (x) + "," + (y) + "," + (x+1) + "," + (y+1) +")")
+        }
+    }
+    }
+if(x != 0 ){
+    if(squares[(y+1) + "," + (x-1)].innerHTML != "empty"){
+        if(squares[(y+1) + "," + (x-1)].className == "whiteSquares"){
+            squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+        squares[(y+1) + "," + (x-1)].setAttribute("onclick" , "pawnMove(" + (x) + "," + (y) + "," + (x-1) + "," + (y+1) +")")
+        }
+    }
+}
+
+        }else{
+      
+    if(y != 7){
+    if(squares[(y+1) + "," + x].innerHTML == "empty"){
+        // var color = squares[(y+1) + "," + x].style.backgroundColor
+        // if(color == "white"){
+        //     color = "yellow"
+        // }else{
+        //     color = "black"
+        // }
+        squares[(y+1) + "," + x].style.backgroundColor = "gray"
+        squares[(y+1) + "," + x].setAttribute("onclick" , "pawnMove(" + x + "," + y + "," + x + "," + (y+1) + ")")
+    }
+    if(x != 7){
+    if(squares[(y+1) + "," + (x+1)].innerHTML != "empty"){
+        if(squares[(y+1) + "," + (x+1)].className == "whiteSquares"){
+            squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+        squares[(y+1) + "," + (x+1)].setAttribute("onclick" , "pawnMove(" + (x) + "," + (y) + "," + (x+1) + "," + (y+1) +")")
+        }
+    }
+    }
+if(x != 0 ){
+    if(squares[(y+1) + "," + (x-1)].innerHTML != "empty"){
+        if(squares[(y+1) + "," + (x-1)].className == "whiteSquares"){
+            squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+        squares[(y+1) + "," + (x-1)].setAttribute("onclick" , "pawnMove(" + (x) + "," + (y) + "," + (x-1) + "," + (y+1) +")")
+        }
+    }
+}
+}
+        }
+}
+function pawnMove(x,y,xToReplace,yToReplace){
+    pawnsMovement[y + "," + x] = "moved"
+    if(whiteGoesFirst > 0){
+        whoseTurn.innerHTML = "It is the color white's turn!"
+    }else{
+        whoseTurn.innerHTML = "It is the color black's turn!"
+    }
+    whiteGoesFirst = -whiteGoesFirst
+   var sub = squares[y + "," + x].innerHTML
+   
+   squares[y + "," + x].innerHTML = "empty"
+   var classSub = squares[y + "," + x].className
+   squares[yToReplace + "," + xToReplace].className = classSub
+   squares[y + "," + x].className = "square"
+
+   squares[yToReplace + "," + xToReplace].innerHTML = sub
+//    if(xToReplace == x){
+//    if(squares[y + "," + x].style.backgroundColor == "white"){
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = blackSub
+//    }else{
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = "white"
+//    }
+//    }
+//    if(xToReplace != x){
+
+//     if(squares[y + "," + x].style.backgroundColor == "white"){
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = "white"
+//    }else{
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = blackSub
+//    }
+//    }
+
+   squares[y + "," + x].style.backgroundImage = ""
+
+   
+   squares[yToReplace + "," + xToReplace].style.backgroundImage = "url(image.png)"
+   
+   if(yToReplace == 7){
+    squares[yToReplace + "," + xToReplace].innerHTML = "queen"
+    squares[yToReplace + "," + xToReplace].style.backgroundImage = "url(queen.png)"
+   }
+   for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray" ){
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+            }
+            squares[yToReplace + "," + xToReplace].setAttribute("onclick", "verifyPiece(" + xToReplace + "," + yToReplace + ")")
+            squares[y + "," + x].style.backgroundColor = color
+
+}
+   }
+}
+
+function showBishopOptions(x,y){
+    if(y != 7){
+  var i = 1
+  if(x != 7){
+ if(squares[(y+1) + "," + (x+1)].innerHTML == "empty"){
+  while(i < 8){
+
+    if(y+i >= 8){
+        break
+    }
+    if(x+i >= 8){
+        break
+    }
+    if(squares[(y+i) + "," + (x+i)].innerHTML == "empty"){
+    squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+i++
+  }else{
+    if(squares[(y+i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+    }
+      break
+  }
+}
+}else{
+    if(squares[(y+i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+    }
+}
+  }
+i = 1
+if(x != 0){
+if(squares[(y+1) + "," + (x-1)].innerHTML == "empty"){
+  while(i < 8){
+    if(y+i >= 8){
+        break
+    }
+    if(x-i < 0){
+        break
+    }
+    if(squares[(y+i) + "," + (x-i)].innerHTML == "empty"){
+    squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+i++
+  }else{
+    if(squares[(y+i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+    }
+      break;
+  }
+}
+}else{
+    if(squares[(y+i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y+i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+    }
+}
+}
+}
+if(y!=0){
+
+
+    var i = 1
+  if(x != 0){
+ if(squares[(y-1) + "," + (x-1)].innerHTML == "empty"){
+  while(i < 8){
+
+    if(y-i < 0){
+        break
+    }
+    if(x-i < 0){
+        break
+    }
+    if(squares[(y-i) + "," + (x-i)].innerHTML == "empty"){
+    squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+i++
+  }else{
+    if(squares[(y-i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+    }
+      break
+  }
+
+}
+}else{
+    if(squares[(y-i) + "," + (x-i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+    }
+}
+  }
+i = 1
+if(x != 7){
+if(squares[(y-1) + "," + (x+1)].innerHTML == "empty"){
+  while(i < 8){
+    if(y-i < 0){
+        break
+    }
+    if(x+i >= 8){
+        break
+    }
+    if(squares[(y-i) + "," + (x+i)].innerHTML == "empty"){
+    squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+i++
+  }else{
+    if(squares[(y-i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+    }
+      break
+  }
+}
+}else{
+    if(squares[(y-i) + "," + (x+i)].className != squares[(y) + "," + (x)].className){
+        squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+    squares[(y-i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+    }
+}
+}
+
+
+
+}
+}
+function bishopMove(x,y,xToReplace,yToReplace){
+    if(whiteGoesFirst > 0){
+        whoseTurn.innerHTML = "It is the color white's turn!"
+    }else{
+        whoseTurn.innerHTML = "It is the color black's turn!"
+    }
+    whiteGoesFirst = -whiteGoesFirst
+    var sub = squares[y + "," + x].innerHTML
+    var imageSub = squares[y + "," + x].style.backgroundImage
+   squares[yToReplace + "," + xToReplace].innerHTML = sub
+   squares[yToReplace + "," + xToReplace].style.backgroundImage = imageSub
+
+   squares[y + "," + x].style.backgroundImage = ""
+
+   var classSub = squares[y + "," + x].className
+   squares[yToReplace + "," + xToReplace].className = classSub
+   squares[y + "," + x].className = "square"
+
+
+   squares[y + "," + x].innerHTML = "empty"
+   squares[y + "," + x].style.backgroundImage = ""
+
+   for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray"){
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+              
+            }
+            squares[yToReplace + "," + xToReplace].setAttribute("onclick", "verifyPiece(" + xToReplace + "," + yToReplace + ")")
+            squares[y + "," + x].style.backgroundColor = color
+
+}
+   }
+}
+
+function showRookOptions(x,y){
+    var i = 1
+    if(y != 7){
+        if(squares[(y+1) + "," + x].innerHTML == "empty"){
+            while(i < 8){
+                if(y + i > 7){
+                    break;
+                }
+                if(squares[(y+i) + "," + x].innerHTML == "empty"){
+                    squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y+i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+                    i++
+  }else{
+      if(squares[(y+i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y+i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+      }
+   
+      break
+  }
+              
+
+            }
+        }else{
+            if(squares[(y+i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y+i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+      }
+        }
+    }
+    var i = 1
+    if(x != 7){
+        if(squares[y + "," + (x+1)].innerHTML == "empty"){
+            while(i < 8){
+                if(x + i > 7){
+                    break;
+                }
+                if(squares[y + "," + (x+i)].innerHTML == "empty"){
+                    squares[y + "," + (x+i)].style.backgroundColor = "gray"
+                    squares[y + "," + (x+i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+                    i++
+  }else{
+    if(squares[(y) + "," + (x+i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x+i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+      }
+      break
+  }
+              
+
+            }
+        }else{
+            if(squares[(y) + "," + (x+i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x+i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+      }
+        }
+    }
+    i = 1
+    if(x!= 0){
+        if(squares[y + "," + (x-1)].innerHTML == "empty"){
+            while(i < 8){
+                if(x - i < 0){
+                    break;
+                }
+                if(squares[y + "," + (x-i)].innerHTML == "empty"){
+                    squares[y + "," + (x-i)].style.backgroundColor = "gray"
+                    squares[y + "," + (x-i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x-i) + "," + y + ")")
+                    i++
+  }else{
+    if(squares[(y) + "," + (x-i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x-i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+      }
+      break
+  }
+              
+
+            }
+            
+        }else{
+            if(squares[(y) + "," + (x-i)].className != squares[y + "," + x].className){
+        squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                    squares[(y) + "," + (x-i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+      }
+        }
+    }
+    i = 1
+    if(y!=0){
+        if(squares[(y-1) + "," + x].innerHTML == "empty"){
+            while(i < 8){
+                if(y - i < 0){
+                    break;
+                }
+                if(squares[(y-i) + "," + x].innerHTML == "empty"){
+                    squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y-i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+                    i++
+  }else{
+    if(squares[(y-i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y-i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+      }
+      break
+  }
+              
+
+            }
+        }else{
+            if(squares[(y-i) + "," + x].className != squares[y + "," + x].className){
+        squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                    squares[(y-i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+      }
+        }
+    }
+    
+}
+
+
+function rookMove(x,y,xToReplace,yToReplace){
+   
+    if(whiteGoesFirst > 0){
+        whoseTurn.innerHTML = "It is the color white's turn!"
+    }else{
+        whoseTurn.innerHTML = "It is the color black's turn!"
+    }
+    whiteGoesFirst = -whiteGoesFirst
+    var sub = squares[y + "," + x].innerHTML
+   squares[yToReplace + "," + xToReplace].innerHTML = sub
+   if(squares[y + "," + x].className == "square"){
+   squares[yToReplace + "," + xToReplace].style.backgroundImage = "url(rook.png)"
+   }else{
+    squares[yToReplace + "," + xToReplace].style.backgroundImage = "url(whiteRook.png)"
+   }
+   
+   var classSub = squares[y + "," + x].className
+   squares[yToReplace + "," + xToReplace].className = classSub
+   squares[y + "," + x].className = "square"
+
+
+   squares[y + "," + x].innerHTML = "empty"
+   squares[y + "," + x].style.backgroundImage = ""
+
+   for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray"){
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+            }
+            squares[yToReplace + "," + xToReplace].setAttribute("onclick", "verifyPiece(" + xToReplace + "," + yToReplace + ")")
+            squares[y + "," + x].style.backgroundColor = color
+
+}
+   }
+}
+
+
+
+
+
+function showWhitePawnOptions(x,y){
+    if(pawnsMovement[y + "," + x] == "notMoved"){
+        if(squares[(y-1) + "," + x].innerHTML == "empty"){
+            squares[(y-1) + "," + x].style.backgroundColor = "gray"
+        squares[(y-1) + "," + x].setAttribute("onclick" , "whitePawnMove(" + x + "," + y + "," + x + "," + (y-1) + ")")
+
+        if(squares[y-2 + "," + x].innerHTML == "empty"){
+        squares[(y-2) + "," + x].style.backgroundColor = "gray"
+        squares[(y-2) + "," + x].setAttribute("onclick" , "whitePawnMove(" + x + "," + y + "," + x + "," + (y-2) + ")")
+        }
+        }
+       
+        if(x != 0){
+    if(squares[(y-1) + "," + (x-1)].innerHTML != "empty"){
+        if(squares[(y-1) + "," + (x-1)].className == "square"){
+            squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+        squares[(y-1) + "," + (x-1)].setAttribute("onclick" , "whitePawnMove(" + (x) + "," + (y) + "," + (x-1) + "," + (y-1) +")")
+        }
+    }
+    }
+if(x != 7){
+    if(squares[(y-1) + "," + (x+1)].innerHTML != "empty"){
+        if(squares[(y-1) + "," + (x+1)].className == "square"){
+            squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+        squares[(y-1) + "," + (x+1)].setAttribute("onclick" , "whitePawnMove(" + (x) + "," + (y) + "," + (x+1) + "," + (y-1) +")")
+        }
+    }
+
+}
+        
+
+        }else{
+    
+    if(y != 0){
+    if(squares[(y-1) + "," + x].innerHTML == "empty"){
+        // var color = squares[(y+1) + "," + x].style.backgroundColor
+        // if(color == "white"){
+        //     color = "yellow"
+        // }else{
+        //     color = "black"
+        // }
+        squares[(y-1) + "," + x].style.backgroundColor = "gray"
+        squares[(y-1) + "," + x].setAttribute("onclick" , "whitePawnMove(" + x + "," + y + "," + x + "," + (y-1) + ")")
+    }
+    if(x != 0){
+    if(squares[(y-1) + "," + (x-1)].innerHTML != "empty"){
+        if(squares[(y-1) + "," + (x-1)].className == "square"){
+            squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+        squares[(y-1) + "," + (x-1)].setAttribute("onclick" , "whitePawnMove(" + (x) + "," + (y) + "," + (x-1) + "," + (y-1) +")")
+        }
+    }
+    }
+if(x != 7){
+    if(squares[(y-1) + "," + (x+1)].innerHTML != "empty"){
+        if(squares[(y-1) + "," + (x+1)].className == "square"){
+            squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+        squares[(y-1) + "," + (x+1)].setAttribute("onclick" , "whitePawnMove(" + (x) + "," + (y) + "," + (x+1) + "," + (y-1) +")")
+        }
+    }
+
+}
+    }
+}
+}
+function whitePawnMove(x,y,xToReplace,yToReplace){
+    pawnsMovement[y + "," + x] = "moved"
+    if(whiteGoesFirst > 0){
+        whoseTurn.innerHTML = "It is the color white's turn!"
+    }else{
+        whoseTurn.innerHTML = "It is the color black's turn!"
+    }
+    whiteGoesFirst = -whiteGoesFirst
+   var sub = squares[y + "," + x].innerHTML
+   
+   squares[y + "," + x].innerHTML = "empty"
+   
+   var classSub = squares[y + "," + x].className
+   squares[yToReplace + "," + xToReplace].className = classSub
+   squares[y + "," + x].className = "square"
+
+   squares[yToReplace + "," + xToReplace].innerHTML = sub
+//    if(xToReplace == x){
+//    if(squares[y + "," + x].style.backgroundColor == "white"){
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = blackSub
+//    }else{
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = "white"
+//    }
+//    }
+//    if(xToReplace != x){
+
+//     if(squares[y + "," + x].style.backgroundColor == "white"){
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = "white"
+//    }else{
+//     squares[yToReplace + "," + xToReplace].style.backgroundColor = blackSub
+//    }
+//    }
+
+   squares[y + "," + x].style.backgroundImage = ""
+   squares[yToReplace + "," + xToReplace].style.backgroundImage = "url(whitePawn.png)"
+
+   if(yToReplace == 0){
+    squares[yToReplace + "," + xToReplace].innerHTML = "queen"
+    squares[yToReplace + "," + xToReplace].style.backgroundImage = "url(whiteQueen.png)"
+   }
+   
+   for(var y = 0; y < 8; y ++){
+        for(var x = 0 ; x < 8; x++){
+            if((x+y)%2 != 0){
+                color = blackSub
+            }else{
+                color = whiteSub
+            }
+            if(squares[y + "," + x].style.backgroundColor == "gray" ){
+                squares[y + "," + x].setAttribute("onclick", "verifyPiece(" + x + "," + y + ")")
+         
+            }
+            squares[yToReplace + "," + xToReplace].setAttribute("onclick", "verifyPiece(" + xToReplace + "," + yToReplace + ")")
+            squares[y + "," + x].style.backgroundColor = color
+
+}
+   }
+}
+
+
+
+
+
+function showKingOptionsCheck(x,y){
+    var subK = []
+ 
+    for(var yT = 0 ; yT < 8; yT ++){
+        for(var xT = 0 ; xT <8; xT++){
+            subK[yT + "," + xT] = kingDanger[yT + "," + xT]
+            kingDanger[yT + "," + xT] = "safe"
+            }
+    }
+    
+    
+    
+     if(y != 0){
+         if(x != 7){
+     if(squares[(y-1) + "," + (x+1)].innerHTML == "empty"){
+         if(kingDanger[(y-1) + "," + (x+1)] == "safe"){
+         squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+     squares[(y-1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y-1) + ")")
+         }
+     }else{
+        
+             if(kingDanger[(y-1) + "," + (x+1)] == "safe"){
+             squares[(y-1) + "," + (x+1)].style.backgroundColor = "gray"
+     squares[(y-1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y-1) + ")")
+         
+     }
+ }
+         }
+ if(x != 0){
+     if(squares[(y-1) + "," + (x-1)].innerHTML == "empty"){
+         if(kingDanger[(y-1) + "," + (x-1)] == "safe"){
+         squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+     squares[(y-1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y-1) + ")")
+         }
+     }else{
+      
+             if(kingDanger[(y-1) + "," + (x-1)] == "safe"){
+             squares[(y-1) + "," + (x-1)].style.backgroundColor = "gray"
+     squares[(y-1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y-1) + ")")
+         
+     }
+ }
+ }
+     if(squares[(y-1) + "," + (x)].innerHTML == "empty"){
+         if(kingDanger[(y-1) + "," + (x)] == "safe"){
+         squares[(y-1) + "," + (x)].style.backgroundColor = "gray"
+     squares[(y-1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y-1) + ")")
+         }
+     }else{
+        
+             if(kingDanger[(y-1) + "," + (x)] == "safe"){
+             squares[(y-1) + "," + (x)].style.backgroundColor = "gray"
+     squares[(y-1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y-1) + ")")
+         }
+     
+ }
+     }
+ if(y != 7){
+     if(x != 7){
+     if(squares[(y+1) + "," + (x+1)].innerHTML == "empty"){
+         if(kingDanger[(y+1) + "," + (x+1)] == "safe"){
+         squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+     squares[(y+1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y+1) + ")")
+         }
+     }else{
+    
+             if(kingDanger[(y+1) + "," + (x+1)] == "safe"){
+             squares[(y+1) + "," + (x+1)].style.backgroundColor = "gray"
+     squares[(y+1) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y+1) + ")")
+         }
+     
+ }
+     }
+ if(x != 0){
+ 
+     if(squares[(y+1) + "," + (x-1)].innerHTML == "empty"){
+         if(kingDanger[(y+1) + "," + (x-1)] == "safe"){
+         squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+     squares[(y+1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y+1) + ")")
+         }
+     }else{
+        
+             if(kingDanger[(y+1) + "," + (x-1)] == "safe"){
+             squares[(y+1) + "," + (x-1)].style.backgroundColor = "gray"
+     squares[(y+1) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y+1) + ")")
+         }
+     
+ }
+ }
+     if(squares[(y+1) + "," + (x)].innerHTML == "empty"){
+         // whoseTurn.innerHTML = kingDanger[(y+1) + "," + (x)]
+         if(kingDanger[(y+1) + "," + (x)] == "safe"){
+         squares[(y+1) + "," + (x)].style.backgroundColor = "gray"
+     squares[(y+1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y+1) + ")")
+         }
+     }else{
+   
+             if(kingDanger[(y+1) + "," + (x)] == "safe"){
+             squares[(y+1) + "," + (x)].style.backgroundColor = "gray"
+     squares[(y+1) + "," + (x)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x) + "," + (y+1) + ")")
+         
+     }
+ }
+ }
+    
+ if(x != 7){
+     if(squares[(y) + "," + (x+1)].innerHTML == "empty"){
+         if(kingDanger[(y) + "," + (x+1)] == "safe"){
+         squares[(y) + "," + (x+1)].style.backgroundColor = "gray"
+     squares[(y) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y) + ")")
+         }
+     }else{
+       
+             if(kingDanger[(y) + "," + (x+1)] == "safe"){
+             squares[(y) + "," + (x+1)].style.backgroundColor = "gray"
+     squares[(y) + "," + (x+1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x+1) + "," + (y) + ")")
+         }
+     
+ }
+ }
+    if(x != 0){
+     if(squares[(y) + "," + (x-1)].innerHTML == "empty"){
+         if(kingDanger[(y) + "," + (x-1)] == "safe"){
+         squares[(y) + "," + (x-1)].style.backgroundColor = "gray"
+     squares[(y) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y) + ")")
+         }
+     }else{
+        
+             if(kingDanger[(y) + "," + (x-1)] == "safe"){
+             squares[(y) + "," + (x-1)].style.backgroundColor = "gray"
+     squares[(y) + "," + (x-1)].setAttribute("onclick", "kingMove(" + x + "," + y + "," +(x-1) + "," + (y) + ")")
+         }
+     
+ }
+    }
+
+    for(var yT = 0 ; yT < 8; yT ++){
+        for(var xT = 0 ; xT <8; xT++){
+      
+            kingDanger[yT + "," + xT] = subK[yT + "," + xT]
+            }
+    }
+ }
+
+
+ 
+ function showQueenOptionsCheck(x,y){
+     if(y != 7){
+   var i = 1
+   if(x != 7){
+  if(squares[(y+1) + "," + (x+1)].innerHTML == "empty"){
+   while(i < 8){
+ 
+     if(y+i >= 8){
+         break
+     }
+     if(x+i >= 8){
+         break
+     }
+     if(squares[(y+i) + "," + (x+i)].innerHTML == "empty"){
+     squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+ i++
+   }else{
+
+         squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+     
+       break
+   }
+ }
+ }else{
+     
+         squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+     
+ }
+   }
+ i = 1
+ if(x != 0){
+ if(squares[(y+1) + "," + (x-1)].innerHTML == "empty"){
+   while(i < 8){
+     if(y+i >= 8){
+         break
+     }
+     if(x-i < 0){
+         break
+     }
+     if(squares[(y+i) + "," + (x-i)].innerHTML == "empty"){
+     squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+ i++
+   }else{
+     
+         squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+     
+       break;
+   }
+ }
+ }else{
+    
+         squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+     
+ }
+ }
+ }
+ if(y!=0){
+ 
+ 
+     var i = 1
+   if(x != 0){
+  if(squares[(y-1) + "," + (x-1)].innerHTML == "empty"){
+   while(i < 8){
+ 
+     if(y-i < 0){
+         break
+     }
+     if(x-i < 0){
+         break
+     }
+     if(squares[(y-i) + "," + (x-i)].innerHTML == "empty"){
+     squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+ i++
+   }else{
+  
+         squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+     
+       break
+   }
+ 
+ }
+ }else{
+   
+         squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+     
+ }
+   }
+ i = 1
+ if(x != 7){
+ if(squares[(y-1) + "," + (x+1)].innerHTML == "empty"){
+   while(i < 8){
+     if(y-i < 0){
+         break
+     }
+     if(x+i >= 8){
+         break
+     }
+     if(squares[(y-i) + "," + (x+i)].innerHTML == "empty"){
+     squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+ i++
+   }else{
+
+         squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+     
+       break
+   }
+ }
+ }else{
+    
+         squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+     
+ }
+ }
+ }
+ 
+ 
+ 
+ var i = 1
+     if(y != 7){
+         if(squares[(y+1) + "," + x].innerHTML == "empty"){
+             while(i < 8){
+                 if(y + i > 7){
+                     break;
+                 }
+                 if(squares[(y+i) + "," + x].innerHTML == "empty"){
+                     squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y+i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+                     i++
+   }else{
+    
+         squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y+i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+       
+    
+       break
+   }
+               
+ 
+             }
+         }else{
+         
+         squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y+i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+       
+         }
+     }
+     var i = 1
+     if(x != 7){
+         if(squares[y + "," + (x+1)].innerHTML == "empty"){
+             while(i < 8){
+                 if(x + i > 7){
+                     break;
+                 }
+                 if(squares[y + "," + (x+i)].innerHTML == "empty"){
+                     squares[y + "," + (x+i)].style.backgroundColor = "gray"
+                     squares[y + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+                     i++
+   }else{
+     
+         squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+       
+       break
+   }
+               
+ 
+             }
+         }else{
+           
+         squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x+i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+       
+         }
+     }
+     i = 1
+     if(x!= 0){
+         if(squares[y + "," + (x-1)].innerHTML == "empty"){
+             while(i < 8){
+                 if(x - i < 0){
+                     break;
+                 }
+                 if(squares[y + "," + (x-i)].innerHTML == "empty"){
+                     squares[y + "," + (x-i)].style.backgroundColor = "gray"
+                     squares[y + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + y + ")")
+                     i++
+   }else{
+  
+         squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+       
+       break
+   }
+               
+ 
+             }
+             
+         }else{
+             
+         squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x-i)].setAttribute("onclick", "queenMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+       
+         }
+     }
+     i = 1
+     if(y!=0){
+         if(squares[(y-1) + "," + x].innerHTML == "empty"){
+             while(i < 8){
+                 if(y - i < 0){
+                     break;
+                 }
+                 if(squares[(y-i) + "," + x].innerHTML == "empty"){
+                     squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y-i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+                     i++
+   }else{
+     
+         squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y-i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+       
+       break
+   }
+               
+ 
+             }
+         }else{
+             
+         squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y-i) + "," + x].setAttribute("onclick", "queenMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+       
+         }
+     }
+     
+ 
+ }
+
+ 
+ function showKnightOptionsCheck(x,y){
+     if(x != 0 && y != 0){
+         if(y - 2 >= 0){
+             if(squares[(y-2) + "," + (x-1)].innerHTML == "empty"){
+                 squares[(y-2) + "," + (x-1)].style.backgroundColor = "gray"
+         squares[(y-2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y-2) + ")")
+             }else{
+                
+                     squares[(y-2) + "," + (x-1)].style.backgroundColor = "gray"
+                     squares[(y-2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y-2) + ")")
+                 
+             }
+         }
+         }
+         if(x != 7 && y != 0){
+             if(y - 2 >= 0){
+             if(squares[(y-2) + "," + (x+1)].innerHTML == "empty"){
+                 squares[(y-2) + "," + (x+1)].style.backgroundColor = "gray"
+         squares[(y-2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y-2) + ")")
+             }else{
+        
+                     squares[(y-2) + "," + (x+1)].style.backgroundColor = "gray"
+                     squares[(y-2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y-2) + ")")
+                 
+             }
+         }
+         }
+         if(x != 0 && y != 0){
+             if(x - 2 >= 0){
+             if(squares[(y-1) + "," + (x-2)].innerHTML == "empty"){
+                 squares[(y-1) + "," + (x-2)].style.backgroundColor = "gray"
+         squares[(y-1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y-1) + ")")
+             }else{
+                
+                     squares[(y-1) + "," + (x-2)].style.backgroundColor = "gray"
+                     squares[(y-1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y-1) + ")")
+                 
+             }
+         }
+         }
+         if(x != 0 && y != 7){
+             if(x - 2 >= 0){
+             if(squares[(y+1) + "," + (x-2)].innerHTML == "empty"){
+                 squares[(y+1) + "," + (x-2)].style.backgroundColor = "gray"
+         squares[(y+1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y+1) + ")")
+             }else{
+                
+                     squares[(y+1) + "," + (x-2)].style.backgroundColor = "gray"
+                     squares[(y+1) + "," + (x-2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-2) + "," + (y+1) + ")")
+                 
+             }
+         }
+         }
+         if(y != 7 && x != 0){
+             if(y + 2 < 8){
+             if(squares[(y+2) + "," + (x-1)].innerHTML == "empty"){
+                 squares[(y+2) + "," + (x-1)].style.backgroundColor = "gray"
+         squares[(y+2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y+2) + ")")
+             }else{
+          
+                     squares[(y+2) + "," + (x-1)].style.backgroundColor = "gray"
+                     squares[(y+2) + "," + (x-1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x-1) + "," + (y+2) + ")")
+                 
+             }
+         }
+         }
+         if(y !=7 && x != 7){
+             if(y + 2 < 8){
+             if(squares[(y+2) + "," + (x+1)].innerHTML == "empty"){
+                 squares[(y+2) + "," + (x+1)].style.backgroundColor = "gray"
+         squares[(y+2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y+2) + ")")
+             }else{
+               
+                     squares[(y+2) + "," + (x+1)].style.backgroundColor = "gray"
+                     squares[(y+2) + "," + (x+1)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+1) + "," + (y+2) + ")")
+                 
+                 }
+         }
+         }
+         if(y != 0 && x != 7){
+             if(x + 2 < 8){
+                 if(squares[(y-1) + "," + (x+2)].innerHTML == "empty"){
+                 squares[(y-1) + "," + (x+2)].style.backgroundColor = "gray"
+         squares[(y-1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y-1) + ")")
+             }else{
+                 
+                     squares[(y-1) + "," + (x+2)].style.backgroundColor = "gray"
+                     squares[(y-1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y-1) + ")")
+                 
+             }
+             }
+         }
+         if(y != 7 && x != 7){
+             if(x + 2 < 8){
+                 if(squares[(y+1) + "," + (x+2)].innerHTML == "empty"){
+                 squares[(y+1) + "," + (x+2)].style.backgroundColor = "gray"
+         squares[(y+1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y+1) + ")")
+             }else{
+                 
+                     squares[(y+1) + "," + (x+2)].style.backgroundColor = "gray"
+                     squares[(y+1) + "," + (x+2)].setAttribute("onclick" , "knightMove(" + x + "," + y + "," + (x+2) + "," + (y+1) + ")")
+                 
+             }
+             }
+         }
+ }
+ 
+ 
+
+ 
+ 
+    
+
+ 
+ function showBishopOptionsCheck(x,y){
+     if(y != 7){
+   var i = 1
+   if(x != 7){
+  if(squares[(y+1) + "," + (x+1)].innerHTML == "empty"){
+   while(i < 8){
+ 
+     if(y+i >= 8){
+         break
+     }
+     if(x+i >= 8){
+         break
+     }
+     if(squares[(y+i) + "," + (x+i)].innerHTML == "empty"){
+     squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+ i++
+   }else{
+  
+         squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+     
+       break
+   }
+ }
+ }else{
+   
+         squares[(y+i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y+i) + ")")
+     
+ }
+   }
+ i = 1
+ if(x != 0){
+ if(squares[(y+1) + "," + (x-1)].innerHTML == "empty"){
+   while(i < 8){
+     if(y+i >= 8){
+         break
+     }
+     if(x-i < 0){
+         break
+     }
+     if(squares[(y+i) + "," + (x-i)].innerHTML == "empty"){
+     squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+ i++
+   }else{
+   
+         squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+     
+       break;
+   }
+ }
+ }else{
+
+         squares[(y+i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y+i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y+i) + ")")
+     
+ }
+ }
+ }
+ if(y!=0){
+ 
+ 
+     var i = 1
+   if(x != 0){
+  if(squares[(y-1) + "," + (x-1)].innerHTML == "empty"){
+   while(i < 8){
+ 
+     if(y-i < 0){
+         break
+     }
+     if(x-i < 0){
+         break
+     }
+     if(squares[(y-i) + "," + (x-i)].innerHTML == "empty"){
+     squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+ i++
+   }else{
+ 
+         squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+     
+       break
+   }
+ 
+ }
+ }else{
+  
+         squares[(y-i) + "," + (x-i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x-i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x-i) + "," + (y-i) + ")")
+     
+ }
+   }
+ i = 1
+ if(x != 7){
+ if(squares[(y-1) + "," + (x+1)].innerHTML == "empty"){
+   while(i < 8){
+     if(y-i < 0){
+         break
+     }
+     if(x+i >= 8){
+         break
+     }
+     if(squares[(y-i) + "," + (x+i)].innerHTML == "empty"){
+     squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+ i++
+   }else{
+   
+         squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+     
+       break
+   }
+ }
+ }else{
+
+         squares[(y-i) + "," + (x+i)].style.backgroundColor = "gray"
+     squares[(y-i) + "," + (x+i)].setAttribute("onclick", "bishopMove(" + x + "," + y + "," +(x+i) + "," + (y-i) + ")")
+     
+ }
+ }
+ 
+ 
+ 
+ }
+ }
+
+ 
+ function showRookOptionsCheck(x,y){
+     var i = 1
+     if(y != 7){
+         if(squares[(y+1) + "," + x].innerHTML == "empty"){
+             while(i < 8){
+                 if(y + i > 7){
+                     break;
+                 }
+                 if(squares[(y+i) + "," + x].innerHTML == "empty"){
+                     squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y+i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+                     i++
+   }else{
+   
+         squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y+i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+       
+    
+       break
+   }
+               
+ 
+             }
+         }else{
+      
+         squares[(y+i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y+i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y+i) + ")")
+       
+         }
+     }
+     var i = 1
+     if(x != 7){
+         if(squares[y + "," + (x+1)].innerHTML == "empty"){
+             while(i < 8){
+                 if(x + i > 7){
+                     break;
+                 }
+                 if(squares[y + "," + (x+i)].innerHTML == "empty"){
+                     squares[y + "," + (x+i)].style.backgroundColor = "gray"
+                     squares[y + "," + (x+i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+                     i++
+   }else{
+
+         squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x+i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+       
+       break
+   }
+               
+ 
+             }
+         }else{
+ 
+         squares[(y) + "," + (x+i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x+i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x+i) + "," + y + ")")
+       
+         }
+     }
+     i = 1
+     if(x!= 0){
+         if(squares[y + "," + (x-1)].innerHTML == "empty"){
+             while(i < 8){
+                 if(x - i < 0){
+                     break;
+                 }
+                 if(squares[y + "," + (x-i)].innerHTML == "empty"){
+                     squares[y + "," + (x-i)].style.backgroundColor = "gray"
+                     squares[y + "," + (x-i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x-i) + "," + y + ")")
+                     i++
+   }else{
+    
+         squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x-i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+       
+       break
+   }
+               
+ 
+             }
+             
+         }else{
+         
+         squares[(y) + "," + (x-i)].style.backgroundColor = "gray"
+                     squares[(y) + "," + (x-i)].setAttribute("onclick", "rookMove(" + x + "," + y + "," +(x-i) + "," + (y) + ")")
+       
+         }
+     }
+     i = 1
+     if(y!=0){
+         if(squares[(y-1) + "," + x].innerHTML == "empty"){
+             while(i < 8){
+                 if(y - i < 0){
+                     break;
+                 }
+                 if(squares[(y-i) + "," + x].innerHTML == "empty"){
+                     squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y-i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+                     i++
+   }else{
+    
+         squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y-i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+       
+       break
+   }
+               
+ 
+             }
+         }else{
+        
+         squares[(y-i) + "," + x].style.backgroundColor = "gray"
+                     squares[(y-i) + "," + x].setAttribute("onclick", "rookMove(" + x + "," + y + "," +x + "," + (y-i) + ")")
+       
+         }
+     }
+     
+ }
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+</script>
